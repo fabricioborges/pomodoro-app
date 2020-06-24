@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, TouchableOpacity, Vibration } from 'react-native';
 
 import styles from './styles';
@@ -9,70 +9,47 @@ interface IClock {
 }
 
 const Main: React.FC = () => {
-    var newClock: IClock = {
-        minutes: 25,
+    const minute = 60;
+    const newClock: IClock = {
+        minutes: 2,
         seconds: 0
     }
-    const [clock, setClock] = useState<IClock>({ minutes: 2, seconds: 0 });
+    const [clock, setClock] = useState<IClock>(newClock);
+    const ONE_SECOND_IN_MS = 1000;
+
+    const PATTERN = [
+        1 * ONE_SECOND_IN_MS,
+        2 * ONE_SECOND_IN_MS,
+        3 * ONE_SECOND_IN_MS
+    ];
+
+    useEffect(() => {
+        setClock(newClock);
+    }, [])
 
 
-    const start = () => {
+    const start = useCallback(() => {
+        let seconds = clock.seconds;
+        let minutes = clock.minutes;
 
-        let seconds = 60;
-        let minutes = 2;
         const timer = setInterval(() => {
-
-           // console.log(seconds);
-            // setClock({minutes: 25, seconds});
-            if (clock.minutes == 0 && clock.seconds === 0) {
-                clearTimeout(timer);
+            if (seconds === 0 && minutes > 0) {
+                seconds = minute - 1;
+                minutes = minutes - 1;
+                setClock({ minutes, seconds });
             }
-
-            if (seconds > 0) {
+            else if (seconds > 0) {
                 seconds = seconds - 1;
-                minutes = clock.minutes - 1;
-
+                minutes = minutes;
                 setClock({ minutes, seconds });
             }
             else {
-                seconds = 60;
-                seconds = seconds - 1;
-                minutes = clock.minutes--;
-
-                setClock({ minutes, seconds });
+                clearInterval(timer);
+                Vibration.vibrate(PATTERN)
+                alert('deu boa')
             }
-        }, 100);
-        //   setClock({ minutes: 25, seconds: 0 });
-
-
-
-        //  console.log(clock)
-        // if (clock) {
-
-        //     setInterval(() => {
-        //         if (clock.minutes > 0 || clock.seconds > 0) {
-        //             //     alert('primeiro if' + clock.seconds);
-        //             if (clock.minutes === 0 && clock.seconds === 0) {
-        //                 clearTimeout();
-        //                 alert('teste else if' + clock.seconds);
-        //                 Vibration.vibrate([100, 200, 300, 30000], true);
-        //                 return null;
-        //             }
-
-
-        //             else {
-        //                 let minutes = clock.minutes;
-        //                 let seconds = clock.seconds - 1;
-        //                 setClock({minutes, seconds});
-        //                 // alert(clock.minutes);     
-        //                 //return null;
-        //             }
-        //         }
-        //     }, 2000);
-        // }
-    }
-
-
+        }, 1000);
+    }, [clock]);
 
     return (
         <View>
