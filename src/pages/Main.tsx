@@ -42,8 +42,7 @@ const Main: React.FC = () => {
     useEffect(() => {
         setClock(newClock);
         setVisible(true);
-
-    }, [])
+    }, [])   
 
     const start = () => {
         count = count + 1;
@@ -77,7 +76,6 @@ const Main: React.FC = () => {
         }, 1000);
 
         setTimer(inteval);
-
     }, []);
 
     const stop = () => {
@@ -101,6 +99,7 @@ const Main: React.FC = () => {
         }
         pomodoro ? start() : pause();
     }
+    
     const longPause = () => {
         count = 0;
         pomodoro = true;
@@ -115,9 +114,9 @@ const Main: React.FC = () => {
         <View>
             <Text style={styles.text}>{title}</Text>
             <View style={styles.container}>
-                <Text style={styles.clock}>{clock?.minutes}</Text>
+                <Text style={styles.clock}>{clock?.minutes === 0 ? '00' : clock?.minutes}</Text>
                 <Text style={styles.dotText}>:</Text>
-                <Text style={styles.clock}>{clock?.seconds}</Text>
+                <Text style={styles.clock}>{clock?.seconds === 0 ? '00' : clock?.seconds}</Text>
             </View>
             {buttonDisabled === true ?
                 <TouchableOpacity onPress={start} style={styles.button}>
