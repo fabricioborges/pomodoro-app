@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, TouchableOpacity, Vibration } from 'react-native';
+import { View, Text, TouchableOpacity, Vibration, Alert } from 'react-native';
 
 import styles from './styles';
 
@@ -11,10 +11,26 @@ interface IClock {
 const Main: React.FC = () => {
     const minute = 60;
     const newClock: IClock = {
-        minutes: 2,
+        minutes: 25,
         seconds: 0
     }
-    const [clock, setClock] = useState<IClock>(newClock);
+
+    const pauseClock: IClock = {
+        minutes: 5,
+        seconds: 0
+    }
+
+    const longPauseClock: IClock = {
+        minutes: 10,
+        seconds: 0
+    }
+
+    const [clock, setClock] = useState<IClock>();
+    const [buttonDisabled, setVisible] = useState<boolean>();
+    const [timer, setTimer] = useState<number>();
+    const [title, setTitle] = useState<string>();
+    let count = 1;
+    let pomodoro = false;
     const ONE_SECOND_IN_MS = 1000;
 
     const PATTERN = [
@@ -25,14 +41,21 @@ const Main: React.FC = () => {
 
     useEffect(() => {
         setClock(newClock);
+        setVisible(true);
+
     }, [])
 
+    const start = () => {
+        count = count + 1;
+        pomodoro = false;
+        setTitle('Pomodoro');
+        countdown(newClock.minutes, newClock.seconds);
+    }
 
-    const start = useCallback(() => {
-        let seconds = clock.seconds;
-        let minutes = clock.minutes;
+    const countdown = useCallback((minutes: number, seconds: number) => {
+        setVisible(false);
 
-        const timer = setInterval(() => {
+        const inteval = setInterval(() => {
             if (seconds === 0 && minutes > 0) {
                 seconds = minute - 1;
                 minutes = minutes - 1;
@@ -44,23 +67,65 @@ const Main: React.FC = () => {
                 setClock({ minutes, seconds });
             }
             else {
-                clearInterval(timer);
+                clearInterval(inteval);
                 Vibration.vibrate(PATTERN)
-                alert('deu boa')
+                Alert.alert(
+                    'Fim do período',
+                    'Pressione "Ok" para o próximo período!',
+                    [{ text: 'Ok', onPress: () => nextPeriod() }])
             }
         }, 1000);
-    }, [clock]);
+
+        setTimer(inteval);
+
+    }, []);
+
+    const stop = () => {
+        setVisible(true);
+        clearInterval(timer);
+    }
+
+    const pause = () => {
+        pomodoro = true;
+        setTitle('Pausa');
+
+        setClock(pauseClock);
+
+        countdown(pauseClock.minutes, pauseClock.seconds);
+    }
+
+    const nextPeriod = () => {
+        if (count === 4) {
+            longPause();
+            return;
+        }
+        pomodoro ? start() : pause();
+    }
+    const longPause = () => {
+        count = 0;
+        pomodoro = true;
+        setTitle('Pausa longa');
+
+        setClock(longPauseClock);
+
+        countdown(longPauseClock.minutes, longPauseClock.seconds);
+    }
 
     return (
         <View>
+            <Text style={styles.text}>{title}</Text>
             <View style={styles.container}>
-                <Text style={styles.text}>{clock?.minutes}</Text>
+                <Text style={styles.clock}>{clock?.minutes}</Text>
                 <Text style={styles.dotText}>:</Text>
-                <Text style={styles.text}>{clock?.seconds}</Text>
+                <Text style={styles.clock}>{clock?.seconds}</Text>
             </View>
-            <TouchableOpacity onPress={start} style={styles.button}>
-                <Text style={styles.buttonText}>Iniciar</Text>
-            </TouchableOpacity>
+            {buttonDisabled === true ?
+                <TouchableOpacity onPress={start} style={styles.button}>
+                    <Text style={styles.buttonText}>Iniciar</Text>
+                </TouchableOpacity> :
+                <TouchableOpacity onPress={stop} style={styles.button}>
+                    <Text style={styles.buttonText}>Parar</Text>
+                </TouchableOpacity>}
         </View>
     )
 }

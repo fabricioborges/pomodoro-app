@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'stretch',
     },
-    text: {
+    clock: {
         height: 76,
         alignSelf: 'stretch',
         backgroundColor: '#FFF',
@@ -18,6 +18,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,        
         width: 100,
         fontSize: 45
+    },
+    text: {
+        height: 76,   
+        marginTop: 20,
+        marginHorizontal: 10,
+        paddingHorizontal: 15,
+        fontSize: 45,
+        alignItems: 'center'
     },
     button: {
         height: 46,
